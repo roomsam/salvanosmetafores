@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ΜΕΤΑΦΟΡΙΚΗ ΣΑΛΒΑΝΟΣ</title>
+<meta name="description" content="Μεταφορές από και προς Σαμοθράκη, Αλεξανδρούπολη, Θεσσαλονίκη και όλη την Ελλάδα. Αποθήκευση και διανομή.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF0F2; --surface:#F7FAFB; --ink:#0F2A3A; --muted:#44596A; --line:#C4D1D8;
+  --accent:#F0AA00; --on-accent:#0F2A3A; --sea:#2F6A86; --land:#6E8E68; --hull:#F4F6F7;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1D28; --surface:#10283A; --ink:#E6EEF2; --muted:#A3B6C2; --line:#244254;
+    --accent:#F5B51C; --on-accent:#0B1D28; --sea:#1C4A61; --land:#4E6D50; --hull:#D9E1E5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1D28; --surface:#10283A; --ink:#E6EEF2; --muted:#A3B6C2; --line:#244254;
+  --accent:#F5B51C; --on-accent:#0B1D28; --sea:#1C4A61; --land:#4E6D50; --hull:#D9E1E5;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Commissioner","Segoe UI","Noto Sans",system-ui,sans-serif;
+  font-size:1.0625rem;line-height:1.6}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+img{max-width:100%}
+.wrap{width:min(1120px,100% - 2.5rem);margin-inline:auto}
+
+/* nav */
+.nav{position:absolute;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:3}
+.nav .wrap{display:flex;justify-content:space-between;align-items:center;padding-block:1.25rem}
+.brand{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;line-height:1}
+.brand .pre{font-weight:500;font-size:.85rem;letter-spacing:.06em;color:var(--muted)}
+.brand .name{font-weight:900;font-size:1.35rem;letter-spacing:.01em;background:var(--accent);color:var(--on-accent);padding:.35rem .6rem;border-radius:6px}
+.nav a.link{text-decoration:none;font-weight:500;padding:.6rem .2rem}
+
+/* hero */
+.hero{position:relative;min-height:100svh;min-height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-copy{position:relative;z-index:2;padding-top:clamp(6rem,14vh,9rem)}
+.hero h1{font-weight:900;font-size:clamp(2.6rem,7.5vw,6rem);line-height:.95;letter-spacing:-.035em;margin:0;max-width:11ch}
+.hero p{max-width:34rem;color:var(--muted);font-size:clamp(1.05rem,1.6vw,1.25rem);margin:1.25rem 0 1.75rem}
+.actions{display:flex;flex-wrap:wrap;gap:.75rem}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:.75rem 1.4rem;border-radius:999px;
+  font-weight:700;text-decoration:none;border:2px solid var(--ink);font-size:1rem}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn:hover{transform:translateY(-1px)}
+.route-tag{position:absolute;z-index:2;bottom:max(1.25rem,env(safe-area-inset-bottom,0px));left:0;right:0}
+.route-tag .wrap{display:flex;justify-content:space-between;font-weight:700;font-size:.95rem;color:#fff;
+  text-shadow:0 1px 8px rgba(0,0,0,.45)}
+@media (max-aspect-ratio:4/5){
+  #scene{position:relative;inset:auto;order:2;flex:1 1 0;min-height:50svh;height:auto}
+  .hero-copy{padding-top:5.5rem}
+  .route-tag{display:none}
+}
+
+/* sections */
+section.block{padding-block:clamp(4rem,9vw,7rem);border-top:1px solid var(--line)}
+h2{font-weight:900;font-size:clamp(2rem,4.5vw,3.25rem);line-height:1.05;letter-spacing:-.03em;margin:0 0 1rem;max-width:18ch}
+.lead{color:var(--muted);max-width:40rem;margin:0}
+.services{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 3rem;margin-top:3rem}
+.service{padding:1.75rem 0;border-top:2px solid var(--ink)}
+.service h3{font-size:1.35rem;margin:0 0 .5rem;letter-spacing:-.01em}
+.service p{margin:0;color:var(--muted);max-width:30rem}
+@media (max-width:720px){.services{grid-template-columns:1fr}}
+
+/* week */
+.week{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem;margin-top:2.5rem}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem;min-height:9rem;display:flex;flex-direction:column;gap:.4rem}
+.day strong{font-size:1.05rem}
+.day span{color:var(--muted);font-size:.95rem;line-height:1.4}
+@media (max-width:720px){.day{flex-wrap:wrap;column-gap:1rem;row-gap:.2rem}}
+.day.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.day.go span{color:var(--on-accent)}
+.note{color:var(--muted);font-size:.95rem;margin-top:1.25rem}
+@media (max-width:720px){
+  .week{grid-template-columns:1fr}
+  .day{min-height:0;flex-direction:row;align-items:baseline;gap:1rem}
+  .day strong{min-width:6.5rem}
+}
+
+/* contact */
+.places{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 2.5rem;margin-top:3rem}
+.place{border-top:2px solid var(--ink);padding-top:1.5rem;display:flex;flex-direction:column;gap:.35rem}
+.place h3{font-size:1.35rem;margin:0 0 .25rem}
+.place p{margin:0;color:var(--muted)}
+.place a{text-decoration:none;overflow-wrap:anywhere;padding-block:.35rem}
+.place a:hover{text-decoration:underline}
+.place a.big{font-size:1.6rem;font-weight:900;letter-spacing:-.02em;margin-top:.5rem}
+@media (max-width:820px){.places{grid-template-columns:1fr;gap:2.5rem}}
+footer{border-top:1px solid var(--line);padding-block:2rem;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="pre">ΜΕΤΑΦΟΡΙΚΗ</span> <span class="name">ΣΑΛΒΑΝΟΣ</span></a>
+    <a class="link" href="#epikoinonia">Επικοινωνία</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-label="Αρχική">
+    <canvas id="scene" aria-hidden="true"></canvas>
+    <div class="wrap hero-copy">
+      <h1>Από τη Σαμοθράκη σε όλη την Ελλάδα.</h1>
+      <p>Μεταφορές από και προς Σαμοθράκη, Αλεξανδρούπολη και Θεσσαλονίκη, με αποθήκευση και διανομή.</p>
+      <div class="actions">
+        <a class="btn primary" href="#epikoinonia">Ζητήστε προσφορά</a>
+        <a class="btn" href="#dromologia">Δείτε τα δρομολόγια</a>
+      </div>
+    </div>
+    <div class="route-tag" aria-hidden="true">
+      <div class="wrap"><span>Αλεξανδρούπολη</span><span>Σαμοθράκη</span></div>
+    </div>
+  </section>
+
+  <section class="block" id="ypiresies">
+    <div class="wrap">
+      <h2>Τι αναλαμβάνουμε</h2>
+      <p class="lead">Αναλαμβάνουμε κάθε είδους μεταφορά, με σημεία σε Σαμοθράκη, Αλεξανδρούπολη και Θεσσαλονίκη.</p>
+      <div class="services">
+        <article class="service">
+          <h3>Μεταφορές Αλεξανδρούπολη – Σαμοθράκη</h3>
+          <p>Κάθε είδους φορτίο προς και από το νησί, με δικά μας οχήματα στο πλοίο της γραμμής.</p>
+        </article>
+        <article class="service">
+          <h3>Αποθήκευση παλετών</h3>
+          <p>Αποθηκευτικός χώρος στην Αλεξανδρούπολη και φορτηγό με υδραυλική πόρτα για γρήγορη φόρτωση και εκφόρτωση.</p>
+        </article>
+        <article class="service">
+          <h3>Διανομή στην Αλεξανδρούπολη</h3>
+          <p>Παραλαβές και παραδόσεις μέσα στην πόλη, καθώς και κατ' οίκον παράδοση επίπλων και ογκωδών ειδών.</p>
+        </article>
+        <article class="service">
+          <h3>Μεταφορές σε όλη την Ελλάδα</h3>
+          <p>Θεσσαλονίκη και κάθε προορισμός στην Ελλάδα, από και προς Αλεξανδρούπολη και Σαμοθράκη.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="dromologia">
+    <div class="wrap">
+      <h2>Η εβδομάδα μας</h2>
+      <p class="lead">Καθημερινές φορτώσεις από και προς Θεσσαλονίκη. Για Σαμοθράκη Τρίτη και Πέμπτη, από Σαμοθράκη Τρίτη και Παρασκευή.</p>
+      <div class="week">
+        <div class="day"><strong>Δευτέρα</strong><span>Θεσσαλονίκη</span></div>
+        <div class="day go"><strong>Τρίτη</strong><span>Προς Σαμοθράκη</span><span>Από Σαμοθράκη</span><span>Θεσσαλονίκη</span></div>
+        <div class="day"><strong>Τετάρτη</strong><span>Θεσσαλονίκη</span></div>
+        <div class="day go"><strong>Πέμπτη</strong><span>Προς Σαμοθράκη</span><span>Θεσσαλονίκη</span></div>
+        <div class="day go"><strong>Παρασκευή</strong><span>Από Σαμοθράκη</span><span>Θεσσαλονίκη</span></div>
+      </div>
+      <p class="note">Τα δρομολόγια της Σαμοθράκης ακολουθούν το πρόγραμμα του πλοίου.</p>
+    </div>
+  </section>
+
+  <section class="block" id="epikoinonia">
+    <div class="wrap">
+      <h2>Πείτε μας τι στέλνετε</h2>
+      <p class="lead">Τι είναι, πόσο είναι και πού πάει. Σας απαντάμε με τιμή και ημέρα παράδοσης.</p>
+      <div class="places">
+        <article class="place">
+          <h3>Αλεξανδρούπολη</h3>
+          <p>Αποθήκη: 6ο χλμ. Αλεξανδρούπολης – Συνόρων, έναντι αεροδρομίου</p>
+          <a class="big" href="tel:+302551026528">2551 026528</a>
+          <a href="mailto:alexandroupolitrans@hotmail.com">alexandroupolitrans@hotmail.com</a>
+        </article>
+        <article class="place">
+          <h3>Σαμοθράκη</h3>
+          <p>Καμαριώτισσα Σαμοθράκης</p>
+          <a class="big" href="tel:+302551042004">2551 042004</a>
+          <a href="mailto:samothrakitrans@hotmail.com">samothrakitrans@hotmail.com</a>
+        </article>
+        <article class="place">
+          <h3>Θεσσαλονίκη</h3>
+          <p>Κορυτσάς 99 &amp; Πόντου, Καλοχώρι</p>
+          <p>Σε συνεργασία με Βλαχάκια Μεταφορές</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">© 2026 ΜΕΤΑΦΟΡΙΚΗ ΣΑΛΒΑΝΟΣ, Salvanos Logistics Center AXD</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const canvas=document.getElementById('scene');
+  if(!window.THREE){canvas.style.display='none';return;}
+  let renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}
+  catch(e){canvas.style.display='none';return;}
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(34,1,0.1,500);
+  scene.fog=new THREE.Fog(0xffffff,70,125);
+
+  // lights
+  const hemi=new THREE.HemisphereLight(0xffffff,0x334455,0.85); scene.add(hemi);
+  const sun=new THREE.DirectionalLight(0xffffff,0.9); sun.position.set(-25,40,20); scene.add(sun);
+
+  // shaping helper so seam vertices get identical offsets
+  function rough(geo,amt,seed){
+    const p=geo.attributes.position;
+    for(let i=0;i<p.count;i++){
+      const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+      const f=1+amt*Math.sin(x*.9+z*.45+seed)*Math.cos(z*.7-y*.5+seed*2);
+      p.setX(i,x*f); p.setZ(i,z*f);
+      if(y>0.01) p.setY(i,y*(1+amt*.8*Math.sin(x*1.3+z+seed)));
+    }
+    geo.computeVertexNormals(); return geo;
+  }
+  const mats={};
+  const mat=(key,extra)=>(mats[key]=new THREE.MeshStandardMaterial(Object.assign({flatShading:true,roughness:.85},extra)));
+
+  // sea
+  const seaGeo=new THREE.PlaneGeometry(220,140,70,44); seaGeo.rotateX(-Math.PI/2);
+  const sea=new THREE.Mesh(seaGeo,mat('sea',{roughness:.6})); scene.add(sea);
+  const seaPos=seaGeo.attributes.position;
+
+  // Samothraki: tall mountain island
+  const island=new THREE.Group();
+  const peak=new THREE.Mesh(rough(new THREE.ConeGeometry(11,11,11,5),.2,1.7),mat('land'));
+  peak.scale.set(1.5,1,1); peak.position.y=4.8; island.add(peak);
+  const ridge=new THREE.Mesh(rough(new THREE.ConeGeometry(7,6,9,3),.2,4.1),mats.land);
+  ridge.position.set(-9,2.4,3); island.add(ridge);
+  const shore=new THREE.Mesh(new THREE.CylinderGeometry(17,18,1.2,14),mat('sand',{color:0xcdbf98}));
+  shore.scale.set(1.3,1,.8); shore.position.y=-.2; island.add(shore);
+  island.position.set(34,0,-18); scene.add(island);
+
+  // Alexandroupolis coast
+  const coast=new THREE.Group();
+  const strip=new THREE.Mesh(new THREE.BoxGeometry(70,1.6,22),mats.land);
+  strip.position.set(-52,.2,12); coast.add(strip);
+  [[-60,2,-1,6,4],[-46,1.6,4,5,3],[-68,1,8,7,5]].forEach(([x,z,s,r,h],i)=>{
+    const hill=new THREE.Mesh(rough(new THREE.ConeGeometry(r,h,8,2),.15,i*3),mats.land);
+    hill.position.set(x,h/2+.8,z+s); coast.add(hill);
+  });
+  // warehouse
+  const wh=new THREE.Mesh(new THREE.BoxGeometry(6,2.6,4),mat('wall',{color:0xdfe5e8}));
+  wh.position.set(-26,2.3,12); coast.add(wh);
+  const roof=new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.4,6,3,1),mat('roof',{color:0x5b6f7c}));
+  roof.rotation.z=Math.PI/2; roof.rotation.x=Math.PI/2; roof.scale.set(1,1,.45); roof.position.set(-26,3.9,12); coast.add(roof);
+  // pallets
+  for(let i=0;i<4;i++){
+    const crate=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.1,1.1),mat('crate'+i,{}));
+    crate.userData.accent=true;
+    crate.position.set(-22.3+(i%2)*1.2,1.55+Math.floor(i/2)*1.12,13.5); coast.add(crate);
+  }
+  // lighthouse
+  const lh=new THREE.Group();
+  const tower=new THREE.Mesh(new THREE.CylinderGeometry(.55,.85,6,10),mat('tower',{color:0xf2f2ee}));
+  tower.position.y=4; lh.add(tower);
+  const lamp=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.8,10),mat('lamp',{emissiveIntensity:.9}));
+  lamp.position.y=7.4; lh.add(lamp);
+  const cap=new THREE.Mesh(new THREE.ConeGeometry(.8,.8,10),mats.roof); cap.position.y=8.2; lh.add(cap);
+  const beam=new THREE.PointLight(0xffcc55,1.2,30); beam.position.y=7.4; lh.add(beam);
+  lh.position.set(-19,0,5.5); coast.add(lh);
+  scene.add(coast);
+
+  // route
+  const curve=new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-17,0.3,3),new THREE.Vector3(-4,0.3,-1),
+    new THREE.Vector3(10,0.3,-6),new THREE.Vector3(19,0.3,-9)]);
+  const routeGeo=new THREE.BufferGeometry().setFromPoints(curve.getPoints(120));
+  const routeMat=new THREE.LineDashedMaterial({dashSize:.9,gapSize:.7,transparent:true,opacity:.9});
+  const route=new THREE.Line(routeGeo,routeMat); route.computeLineDistances(); scene.add(route);
+
+  // ferry with cargo
+  const ferry=new THREE.Group();
+  const hull=new THREE.Mesh(new THREE.BoxGeometry(4.6,1,1.8),mat('hull'));
+  hull.position.y=.5; ferry.add(hull);
+  const bow=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,1,3),mats.hull);
+  bow.rotation.y=Math.PI/2; bow.scale.set(1,1,1); bow.position.set(2.55,.5,0); ferry.add(bow);
+  const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.1,1,1.4),mats.hull); cabin.position.set(-1.5,1.5,0); ferry.add(cabin);
+  for(let i=0;i<3;i++){
+    const c=new THREE.Mesh(new THREE.BoxGeometry(.9,.75,1.3),mat('cargo'+i,{}));
+    c.userData.accent=i!==1; c.userData.alt=i===1;
+    c.position.set(-.3+i*1,1.38,0); ferry.add(c);
+  }
+  scene.add(ferry);
+
+  function applyTheme(){
+    mats.sea.color.set(css('--sea'));
+    mats.land.color.set(css('--land'));
+    mats.hull.color.set(css('--hull'));
+    const acc=new THREE.Color(css('--accent'));
+    mats.lamp.color.copy(acc); mats.lamp.emissive=acc.clone();
+    Object.keys(mats).forEach(k=>{
+      if(k.startsWith('crate')||k.startsWith('cargo')){
+        mats[k].color.set(k==='cargo1'?css('--sea'):css('--accent'));
+      }
+    });
+    routeMat.color.set(css('--ink'));
+    scene.fog.color.set(css('--bg'));
+    render();
+  }
+
+  const isMobile=()=>window.innerWidth/window.innerHeight<.8;
+  let w=0,h=0;
+  function resize(){
+    const r=canvas.getBoundingClientRect(); w=r.width; h=r.height;
+    renderer.setSize(w,h,false); camera.aspect=w/h;
+    camera.fov=isMobile()?52:34; camera.updateProjectionMatrix();
+    render();
+  }
+
+  let px=0,py=0,scrollF=0;
+  window.addEventListener('pointermove',e=>{px=e.clientX/window.innerWidth-.5;py=e.clientY/window.innerHeight-.5;},{passive:true});
+  window.addEventListener('scroll',()=>{scrollF=Math.min(1,window.scrollY/Math.max(1,h));},{passive:true});
+
+  let t=0;
+  function update(dt){
+    t+=dt;
+    for(let i=0;i<seaPos.count;i++){
+      const x=seaPos.getX(i),z=seaPos.getZ(i);
+      seaPos.setY(i,Math.sin(x*.14+t*.9)*.35+Math.cos(z*.22+t*.7)*.28);
+    }
+    seaPos.needsUpdate=true; seaGeo.computeVertexNormals();
+    // ferry: out and back
+    const cyc=(t*.045)%2, u=cyc<1?cyc:2-cyc, dir=cyc<1?1:-1;
+    const s=.5-.5*Math.cos(u*Math.PI);
+    const p=curve.getPointAt(s), tan=curve.getTangentAt(s).multiplyScalar(dir);
+    ferry.position.set(p.x,Math.sin(t*1.6)*.18,p.z);
+    ferry.rotation.y=Math.atan2(-tan.z,tan.x);
+    ferry.rotation.z=Math.sin(t*1.3)*.04;
+    beam.intensity=1+.5*Math.sin(t*3);
+    routeMat.dashOffset=-t*.8;
+  }
+  function render(){
+    if(isMobile()){
+      // look along the route: Alexandroupolis in front, Samothraki across the sea
+      camera.position.set(-44+px*4,20-scrollF*5,26);
+      camera.lookAt(8,1-scrollF*3,-6);
+    }else{
+      camera.position.set(px*6+4,20-scrollF*8+py*2,56-scrollF*10);
+      camera.lookAt(6,11-scrollF*6,-4);
+    }
+    renderer.render(scene,camera);
+  }
+
+  let last=performance.now(),running=true;
+  function loop(now){
+    if(!running) return;
+    update(Math.min(.05,(now-last)/1000)); last=now; render();
+    requestAnimationFrame(loop);
+  }
+  new ResizeObserver(resize).observe(canvas);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+  new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+  resize(); update(4); applyTheme();
+  if(!reduce){
+    new IntersectionObserver(([e])=>{
+      if(e.isIntersecting&&!running){running=true;last=performance.now();requestAnimationFrame(loop);}
+      else if(!e.isIntersecting) running=false;
+    }).observe(canvas);
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+</body>
+</html>
