@@ -396,7 +396,16 @@ body{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom,0px))}
       location.href='viber://chat?number=%2B306982964359&draft='+encodeURIComponent(t);
       msg.textContent='Αν δεν άνοιξε το Viber, πατήστε «Αποστολή με email» ή καλέστε μας.';
     } else {
-      location.href='mailto:alexandroupolitrans@hotmail.com?subject='+encodeURIComponent('Αίτημα προσφοράς — '+v('apo')+' → '+v('pros'))+'&body='+encodeURIComponent(t);
+      var subj='Αίτημα προσφοράς — '+v('apo')+' → '+v('pros');
+      b.disabled=true; msg.className='qmsg'; msg.textContent='Αποστολή…';
+      fetch('https://formsubmit.co/ajax/alexandroupolitrans@hotmail.com',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify({_subject:subj,_template:'table',_captcha:'false','Τι στέλνει':v('ti'),'Ποσότητα':v('posotita'),'Από':v('apo'),'Προς':v('pros'),'Περιγραφή':v('perigrafi'),'Όνομα':v('onoma'),'Τηλέφωνο':v('til')})})
+      .then(function(r){return r.json()}).then(function(j){
+        if(j&&(j.success===true||j.success==='true')){msg.textContent='✔ Το αίτημα στάλθηκε. Θα σας απαντήσουμε σύντομα με τιμή και ημέρα.';f.reset()}
+        else throw new Error('x');
+      }).catch(function(){
+        msg.className='qmsg err';msg.textContent='Δεν στάλθηκε. Στείλτε με Viber ή καλέστε μας στο 2551 026528.';
+      }).then(function(){b.disabled=false});
     }
   });
 })();
