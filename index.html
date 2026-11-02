@@ -14,7 +14,7 @@
 <meta property="og:description" content="Δρομολόγια για Σαμοθράκη Τρίτη και Πέμπτη, καθημερινά Θεσσαλονίκη. Αποθήκευση και διανομή στην Αλεξανδρούπολη. Ζητήστε προσφορά με ένα μήνυμα.">
 <meta property="og:image" content="https://www.salvanosmetafores.com/foto.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0F2A3A">
+<meta name="theme-color" content="#05070d">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"MovingCompany","@id":"https://www.salvanosmetafores.com/#alexandroupoli","name":"ΜΕΤΑΦΟΡΙΚΗ ΣΑΛΒΑΝΟΣ — Αλεξανδρούπολη","url":"https://www.salvanosmetafores.com/","image":"https://www.salvanosmetafores.com/foto.jpg","telephone":"+302551026528","email":"alexandroupolitrans@hotmail.com","address":{"@type":"PostalAddress","streetAddress":"6ο χλμ. Αλεξανδρούπολης – Συνόρων, έναντι αεροδρομίου","addressLocality":"Αλεξανδρούπολη","postalCode":"68100","addressCountry":"GR"},"geo":{"@type":"GeoCoordinates","latitude":40.8599375,"longitude":25.9430638},"openingHours":"Mo-Sa 08:00-15:00","areaServed":["Αλεξανδρούπολη","Σαμοθράκη","Θεσσαλονίκη","Ελλάδα"],"sameAs":["https://www.instagram.com/salvanos_metafores/","https://www.google.com/maps/place/?q=place_id:ChIJiympqoQbshQRnUEQCmsdhNY"]},
@@ -26,20 +26,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#EAF0F2; --surface:#F7FAFB; --ink:#0F2A3A; --muted:#44596A; --line:#C4D1D8;
-  --accent:#F0AA00; --on-accent:#0F2A3A; --sea:#2F6A86; --land:#6E8E68; --hull:#F4F6F7;
+  --bg:#05070d; --surface:#0d1422; --ink:#e8edf4; --muted:#8f9bb0; --line:#1b2536;
+  --accent:#2f8cff; --on-accent:#ffffff; --sea:#1c4a61; --land:#3f5b4a; --hull:#c9d1dc;
+  color-scheme:dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0B1D28; --surface:#10283A; --ink:#E6EEF2; --muted:#A3B6C2; --line:#244254;
-    --accent:#F5B51C; --on-accent:#0B1D28; --sea:#1C4A61; --land:#4E6D50; --hull:#D9E1E5;
+    --bg:#05070d; --surface:#0d1422; --ink:#e8edf4; --muted:#8f9bb0; --line:#1b2536;
+    --accent:#2f8cff; --on-accent:#ffffff; --sea:#1c4a61; --land:#3f5b4a; --hull:#c9d1dc;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0B1D28; --surface:#10283A; --ink:#E6EEF2; --muted:#A3B6C2; --line:#244254;
-  --accent:#F5B51C; --on-accent:#0B1D28; --sea:#1C4A61; --land:#4E6D50; --hull:#D9E1E5;
+  --bg:#05070d; --surface:#0d1422; --ink:#e8edf4; --muted:#8f9bb0; --line:#1b2536;
+  --accent:#2f8cff; --on-accent:#ffffff; --sea:#1c4a61; --land:#3f5b4a; --hull:#c9d1dc;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -68,7 +69,8 @@ img{max-width:100%}
 .hero p{max-width:34rem;color:var(--muted);font-size:clamp(1.05rem,1.6vw,1.25rem);margin:1.25rem 0 1.75rem}
 .actions{display:flex;flex-wrap:wrap;gap:.75rem}
 .btn{display:inline-flex;align-items:center;min-height:48px;padding:.75rem 1.4rem;border-radius:999px;
-  font-weight:700;text-decoration:none;border:2px solid var(--ink);font-size:1rem}
+  font-weight:700;text-decoration:none;border:2px solid #2a3850;font-size:1rem;background:transparent;color:var(--ink)}
+.btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn:hover{transform:translateY(-1px)}
 .route-tag{position:absolute;z-index:2;bottom:max(1.25rem,env(safe-area-inset-bottom,0px));left:0;right:0}
@@ -100,8 +102,8 @@ h2{font-weight:900;font-size:clamp(2rem,4.5vw,3.25rem);line-height:1.05;letter-s
 .day strong{font-size:1.05rem}
 .day span{color:var(--muted);font-size:.95rem;line-height:1.4}
 @media (max-width:720px){.day{flex-wrap:wrap;column-gap:1rem;row-gap:.2rem}}
-.day.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.day.go span{color:var(--on-accent)}
+.day.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.day.go span{color:#e8edf4}
 .note{color:var(--muted);font-size:.95rem;margin-top:1.25rem}
 @media (max-width:720px){
   .week{grid-template-columns:1fr}
@@ -111,7 +113,7 @@ h2{font-weight:900;font-size:clamp(2rem,4.5vw,3.25rem);line-height:1.05;letter-s
 
 /* contact */
 .places{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 2.5rem;margin-top:3rem}
-.place{border-top:2px solid var(--ink);padding-top:1.5rem;display:flex;flex-direction:column;gap:.35rem}
+.place{border-top:2px solid var(--accent);padding-top:1.5rem;display:flex;flex-direction:column;gap:.35rem}
 .place h3{font-size:1.35rem;margin:0 0 .25rem}
 .place p{margin:0;color:var(--muted)}
 .place a{text-decoration:none;overflow-wrap:anywhere;padding-block:.35rem}
@@ -138,7 +140,7 @@ body{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom,0px))}
 @media (max-width:900px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}}
 
 /* trust strip */
-.trust{background:var(--ink);color:var(--bg);padding-block:1.75rem}
+.trust{background:var(--surface);color:var(--ink);padding-block:1.75rem;border-top:1px solid var(--line)}
 .trust .wrap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
 .trust .t{display:flex;flex-direction:column;gap:.15rem;min-width:0}
 .trust .t b{font-size:clamp(1.6rem,3.2vw,2.3rem);font-weight:900;letter-spacing:-.03em;line-height:1;color:var(--accent)}
@@ -154,7 +156,7 @@ body{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom,0px))}
 .qgrid .full{grid-column:1/-1}
 .qgrid label{display:flex;flex-direction:column;gap:.35rem;font-weight:700;font-size:.92rem;min-width:0}
 .qgrid label small{font-weight:500;color:var(--muted)}
-.qgrid input,.qgrid select,.qgrid textarea{font:inherit;font-weight:500;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.75rem .85rem;min-height:48px;width:100%}
+.qgrid input,.qgrid select,.qgrid textarea{font:inherit;font-weight:500;color:#0f2a3a;background:#f7fafb;border:1px solid #c4d1d8;border-radius:10px;padding:.75rem .85rem;min-height:48px;width:100%}
 .qgrid textarea{min-height:5.5rem;resize:vertical}
 .qgrid input:focus,.qgrid select:focus,.qgrid textarea:focus{outline:3px solid var(--accent);outline-offset:1px}
 .qactions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.25rem;align-items:center}
