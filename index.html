@@ -510,7 +510,7 @@ const rail=new THREE.Mesh(new THREE.TorusGeometry(2.2,.06,6,32),gal.material);ra
 const lanternMat=new THREE.MeshStandardMaterial({color:0xcfe3ea,emissive:0xffd27a,emissiveIntensity:0,transparent:true,opacity:.8,roughness:.05,metalness:.2});
 const lantern=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,2,16),lanternMat);lantern.position.y=19.6;LH.add(lantern);
 const dome=new THREE.Mesh(new THREE.SphereGeometry(1.35,20,10,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x23302b,roughness:.4,metalness:.4}));dome.position.y=20.6;LH.add(dome);
-LH.position.set(-88,0,-200);LH.scale.setScalar(2.6);scene.add(LH);
+LH.position.set(-88,0,-200);LH.scale.setScalar(3.0);scene.add(LH);
 // waterfront buildings
 const bcol=[0xf1ece2,0xe4d9c6,0xf6f3ee,0xd9ccb5,0xebe2d2,0xcdd3d6];
 const glass=new THREE.MeshStandardMaterial({color:0x34414c,roughness:.25,metalness:.5});
@@ -564,7 +564,7 @@ const inst=new THREE.InstancedMesh(cg,contMat,bays.length);const dm=new THREE.Ob
 bays.forEach((p,i)=>{dm.position.set(...p);dm.updateMatrix();inst.setMatrixAt(i,dm.matrix);inst.setColorAt(i,col.set(pal[Math.floor(Math.random()*pal.length)]));});
 ship.add(inst);
 const deckWin=glassS,navL=new THREE.PointLight(0xffe2b0,0,40,2);ship.add(navL);
-ship.scale.setScalar(1.9);scene.add(ship);
+ship.scale.setScalar(2.2);scene.add(ship);
 // wake
 const wc=document.createElement('canvas');wc.width=256;wc.height=1024;const x=wc.getContext('2d');
 for(let i=0;i<6000;i++){const yy=Math.random()*1024,t=yy/1024,spread=16+t*100,side=(Math.random()<.5?-1:1),edge=Math.random()<.5;const xx=128+(edge?side*spread*(.8+Math.random()*.2):(Math.random()-.5)*(14+t*40));const r=2+Math.random()*5*(1-t*.5);x.fillStyle='rgba(255,255,255,'+(.4*Math.pow(1-t,1.2)*(.4+Math.random()*.6))+')';x.beginPath();x.arc(xx,yy,r,0,6.283);x.fill();}
@@ -585,7 +585,7 @@ function apply(m){mode=m;const p=P[m];
  wU.deep.value.set(p.deep);wU.shallow.value.set(p.shallow);wU.skyHor.value.set(p.hor);wU.skyTop.value.set(p.top);wU.sunCol.value.set(p.sunCol);wU.fogCol.value.set(p.haze);wU.fogD.value=p.fogD;
  R.toneMappingExposure=m==='night'?1.05:m==='golden'?1.0:.95;
 }
-function resize(){const w=canvas.clientWidth||innerWidth,h=canvas.clientHeight||innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=w/h<1.15?62:46;cam.updateProjectionMatrix();}
+function resize(){const w=canvas.clientWidth||innerWidth,h=canvas.clientHeight||innerHeight;R.setSize(w,h,false);cam.aspect=w/h;const cr=canvas.getBoundingClientRect(),ac=document.querySelector('.hero .actions'),stacked=!ac||ac.getBoundingClientRect().bottom<=cr.top+8;if(!stacked&&w/h>=1.15){cam.fov=46;const a=w/h;let r=(ac.getBoundingClientRect().right-cr.left)/w;const pL0=.5-.465/(2*.4245*a);let s=Math.min(.3,Math.max(0,r+.04-pL0));cam.setViewOffset(w,h,-s*w,-.22*h,w,h);}else{cam.fov=w/h<1.15?62:48;cam.setViewOffset(w,h,-.1*w,.06*h,w,h);}cam.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(canvas);resize();
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;const t0=performance.now();let running=true;
 function frame(now){const t=reduce?24:(now-t0)/1000;wU.time.value=t;
