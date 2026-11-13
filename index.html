@@ -169,6 +169,8 @@ body{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom,0px))}
 .place a.review{font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .callbar a.vb{background:#7360F2;border-color:#7360F2;color:#fff}
 .callbar div{grid-template-columns:repeat(4,minmax(0,1fr))}
+.hero::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,13,.78) 0%,rgba(5,7,13,.45) 38%,rgba(5,7,13,0) 62%),linear-gradient(0deg,rgba(5,7,13,.85) 0%,rgba(5,7,13,0) 22%)}
+@media (max-aspect-ratio:4/5){.hero::before{display:none}}
 </style>
 </head>
 <body>
@@ -416,181 +418,184 @@ body{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom,0px))}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
-  const canvas=document.getElementById('scene');
-  if(!window.THREE){canvas.style.display='none';return;}
-  let renderer;
-  try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}
-  catch(e){canvas.style.display='none';return;}
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+const canvas=document.getElementById('scene');if(!window.THREE){canvas.style.display='none';return;}
+let R;try{R=new THREE.WebGLRenderer({canvas,antialias:true});}catch(e){canvas.style.display='none';return;}const mob=Math.min(innerWidth,innerHeight)<700;
+R.setPixelRatio(Math.min(devicePixelRatio||1,mob?1.5:2));
+R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(38,1,0.5,6000);
+cam.position.set(100,13,200);cam.lookAt(100,24,-300);
 
-  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(34,1,0.1,500);
-  scene.fog=new THREE.Fog(0xffffff,70,125);
+// ---------- presets ----------
+const P={
+ day:{sunDir:[0.42,0.62,0.28],sunCol:0xfff3df,sunI:1.25,top:0x3f7fd0,hor:0xcfe2f2,haze:0xc6d8e6,deep:0x0b3a5c,shallow:0x2a7a96,hemiS:0xbfd9ff,hemiG:0x40505c,hemiI:.8,fogD:.0011,stars:0,lights:0,cap:'<b>Πρόταση 1 · Μέρα</b><br><span>Ρεαλιστική θάλασσα με κύματα και αντανάκλαση ήλιου, ο Φάρος της Αλεξανδρούπολης μπροστά, το Φεγγάρι της Σαμοθράκης στον ορίζοντα με ομίχλη απόστασης, το πλοίο αφήνει απόνερα.</span>'},
+ golden:{sunDir:[0.62,0.07,-0.78],sunCol:0xffb469,sunI:1.5,top:0x2d4f86,hor:0xffb980,haze:0xf0a878,deep:0x10283f,shallow:0x5a5a6a,hemiS:0xffc89a,hemiG:0x2a2430,hemiI:.42,fogD:.0019,stars:0,lights:.6,cap:'<b>Πρόταση 2 · Χρυσή ώρα</b><br><span>Ο ήλιος χαμηλά πίσω από τη Σαμοθράκη, χρυσός διάδρομος πάνω στο νερό, ο φάρος και τα παράθυρα του πλοίου αρχίζουν να ανάβουν.</span>'},
+ night:{sunDir:[-0.5,0.32,-0.8],sunCol:0x9fb9ff,sunI:.35,top:0x02040b,hor:0x0b1f3d,haze:0x0a1830,deep:0x020812,shallow:0x0a2340,hemiS:0x3a5c9a,hemiG:0x05070d,hemiI:.25,fogD:.0018,stars:1,lights:1,cap:'<b>Πρόταση 3 · Νύχτα, στα χρώματα του site</b><br><span>Σκούρο μπλε όπως η σελίδα, φεγγάρι πάνω από τη Σαμοθράκη, η δέσμη του φάρου σαρώνει τη θάλασσα σε ηλεκτρίκ μπλε, το πλοίο φωτισμένο.</span>'}
+};
 
-  // lights
-  const hemi=new THREE.HemisphereLight(0xffffff,0x334455,0.85); scene.add(hemi);
-  const sun=new THREE.DirectionalLight(0xffffff,0.9); sun.position.set(-25,40,20); scene.add(sun);
+// ---------- sky ----------
+const skyU={top:{value:new THREE.Color()},hor:{value:new THREE.Color()},sunDir:{value:new THREE.Vector3()},sunCol:{value:new THREE.Color()},stars:{value:0},night:{value:0}};
+const sky=new THREE.Mesh(new THREE.SphereGeometry(3000,48,24),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:skyU,
+vertexShader:'varying vec3 vD;void main(){vD=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+fragmentShader:`varying vec3 vD;uniform vec3 top,hor,sunDir,sunCol;uniform float stars,night;
+float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453);}
+void main(){vec3 d=normalize(vD);float y=max(d.y,0.);vec3 c=mix(hor,top,pow(y,.45));
+float s=max(dot(d,normalize(sunDir)),0.);
+c+=sunCol*(pow(s,800.)*6.+pow(s,24.)*.35*(1.-night*.6)+pow(s,4.)*.12*(1.-night));
+if(night>.5){c+=sunCol*smoothstep(.9994,.9997,s)*1.2;}
+if(stars>0.){vec3 q=floor(d*420.);float st=step(.9985,h(q))*smoothstep(.02,.25,d.y);c+=vec3(st)*stars*.9;}
+gl_FragColor=vec4(c,1.);}`}));
+scene.add(sky);
 
-  // shaping helper so seam vertices get identical offsets
-  function rough(geo,amt,seed){
-    const p=geo.attributes.position;
-    for(let i=0;i<p.count;i++){
-      const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
-      const f=1+amt*Math.sin(x*.9+z*.45+seed)*Math.cos(z*.7-y*.5+seed*2);
-      p.setX(i,x*f); p.setZ(i,z*f);
-      if(y>0.01) p.setY(i,y*(1+amt*.8*Math.sin(x*1.3+z+seed)));
-    }
-    geo.computeVertexNormals(); return geo;
-  }
-  const mats={};
-  const mat=(key,extra)=>(mats[key]=new THREE.MeshStandardMaterial(Object.assign({flatShading:true,roughness:.85},extra)));
+// ---------- lights ----------
+const hemi=new THREE.HemisphereLight(0xffffff,0x334455,.5);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffffff,1);scene.add(sun);
+scene.fog=new THREE.FogExp2(0xcfe2f2,.0016);
 
-  // sea
-  const seaGeo=new THREE.PlaneGeometry(220,140,70,44); seaGeo.rotateX(-Math.PI/2);
-  const sea=new THREE.Mesh(seaGeo,mat('sea',{roughness:.6})); scene.add(sea);
-  const seaPos=seaGeo.attributes.position;
+// ---------- water ----------
+const wU={time:{value:0},deep:{value:new THREE.Color()},shallow:{value:new THREE.Color()},skyHor:{value:new THREE.Color()},skyTop:{value:new THREE.Color()},sunDir:{value:new THREE.Vector3()},sunCol:{value:new THREE.Color()},fogCol:{value:new THREE.Color()},fogD:{value:.0016},beam:{value:new THREE.Vector3()},beamOn:{value:0}};
+const wGeo=new THREE.PlaneGeometry(4000,4000,mob?200:320,mob?200:320);wGeo.rotateX(-Math.PI/2);
+const water=new THREE.Mesh(wGeo,new THREE.ShaderMaterial({uniforms:wU,
+vertexShader:`uniform float time;varying vec3 vW;varying float vH;
+vec3 gw(vec2 p,vec2 dir,float wl,float a,float sp){float k=6.2831/wl;float f=k*(dot(dir,p)-sp*time);return vec3(dir.x*a*cos(f),a*sin(f),dir.y*a*cos(f));}
+void main(){vec3 p=position;vec2 q=p.xz;float fade=1./(1.+length(q)/900.);
+vec3 o=gw(q,normalize(vec2(1.,.6)),38.,.55,5.)+gw(q,normalize(vec2(-.4,1.)),21.,.3,3.6)+gw(q,normalize(vec2(.8,-.3)),11.,.16,2.6)+gw(q,normalize(vec2(.2,.9)),6.,.07,1.9);
+p+=o*fade;vH=o.y;vec4 w=modelMatrix*vec4(p,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+fragmentShader:`uniform float time,fogD,beamOn;uniform vec3 deep,shallow,skyHor,skyTop,sunDir,sunCol,fogCol,beam;varying vec3 vW;varying float vH;
+float n(vec2 p){return sin(p.x)*sin(p.y);}
+void main(){vec2 q=vW.xz;
+vec3 N=normalize(vec3(
+ .09*cos(q.x*.21+time*1.1)+.07*cos(q.x*.53-q.y*.31+time*1.7)+.06*cos(q.x*1.37+q.y*.9+time*2.3)+.035*cos(q.x*2.9-q.y*2.1+time*3.1),
+ 1.,
+ .09*cos(q.y*.19-time*.9)+.07*cos(q.y*.47+q.x*.27+time*1.5)+.06*cos(q.y*1.21-q.x*.8+time*2.6)+.035*cos(q.y*3.3+q.x*1.9-time*2.9)));
+vec3 V=normalize(cameraPosition-vW);float fr=.02+.98*pow(1.-max(dot(N,V),0.),5.);
+vec3 Rf=reflect(-V,N);vec3 skyc=mix(skyHor,skyTop,pow(max(Rf.y,0.),.5));
+vec3 base=mix(deep,shallow,clamp(vH*.6+.35,0.,1.)*.6);
+vec3 c=mix(base,skyc,fr*.7);
+float sp=pow(max(dot(Rf,normalize(sunDir)),0.),420.);c+=sunCol*sp*3.5+sunCol*pow(max(dot(Rf,normalize(sunDir)),0.),40.)*.12;
+float foam=smoothstep(.62,.95,vH)*.35;c=mix(c,vec3(.9),foam);
+if(beamOn>0.){vec3 bd=normalize(vec3(beam.x,0.,beam.z));vec2 rel=q-vec2(-88.,-200.);float al=dot(normalize(rel),bd.xz);c+=vec3(.25,.55,1.)*smoothstep(.985,1.,al)*exp(-length(rel)/260.)*beamOn*.6;}
+float d=length(vW-cameraPosition);float f=1.-exp(-pow(fogD*d,1.6));c=mix(c,fogCol,clamp(f,0.,1.));
+gl_FragColor=vec4(c,1.);}`}));
+scene.add(water);
 
-  // Samothraki: tall mountain island
-  const island=new THREE.Group();
-  const peak=new THREE.Mesh(rough(new THREE.ConeGeometry(11,11,11,5),.2,1.7),mat('land'));
-  peak.scale.set(1.5,1,1); peak.position.y=4.8; island.add(peak);
-  const ridge=new THREE.Mesh(rough(new THREE.ConeGeometry(7,6,9,3),.2,4.1),mats.land);
-  ridge.position.set(-9,2.4,3); island.add(ridge);
-  const shore=new THREE.Mesh(new THREE.CylinderGeometry(17,18,1.2,14),mat('sand',{color:0xcdbf98}));
-  shore.scale.set(1.3,1,.8); shore.position.y=-.2; island.add(shore);
-  island.position.set(34,0,-18); scene.add(island);
+// ---------- Samothraki (Fengari) ----------
+function noise2(x,y){let v=0,a=1,f=1;for(let o=0;o<5;o++){v+=a*(Math.sin(x*f*1.7+Math.sin(y*f*.9+o))*.5+Math.sin(y*f*1.3+x*f*.4+o*1.7)*.5);a*=.5;f*=2.1;}return v;}
+const iGeo=new THREE.PlaneGeometry(900,420,260,130);iGeo.rotateX(-Math.PI/2);
+const ip=iGeo.attributes.position;const icol=[];
+for(let i=0;i<ip.count;i++){const x=ip.getX(i),z=ip.getZ(i);const nx=x/450,nz=z/210;
+ const r=Math.sqrt(nx*nx+nz*nz*1.1);let m=Math.max(0,1-r);m=m*m*(3-2*m);
+ const ridge=Math.exp(-Math.pow((nx+.05)*1.6,2)-Math.pow(nz*1.9,2));
+ const peaks=Math.exp(-Math.pow((nx-.02)*5,2)-Math.pow((nz+.05)*4,2))*.55+Math.exp(-Math.pow((nx+.28)*5.5,2)-Math.pow(nz*4,2))*.35+Math.exp(-Math.pow((nx-.3)*6,2)-Math.pow((nz-.1)*4,2))*.3;
+ let h=m*(20+95*ridge+70*peaks+16*noise2(nx*7,nz*7)*m)-5;
+ ip.setY(i,h);
+ const t=Math.min(1,Math.max(0,h/150));const g=new THREE.Color().setHSL(.27-.12*t,.28-.15*t,.20+.22*t);if(h<2)g.setHSL(.1,.2,.35);icol.push(g.r,g.g,g.b);}
+iGeo.setAttribute('color',new THREE.Float32BufferAttribute(icol,3));iGeo.computeVertexNormals();
+const island=new THREE.Mesh(iGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95,metalness:0}));
+island.position.set(480,0,-950);island.rotation.y=-.12;island.scale.set(.85,1.15,.85);scene.add(island);
 
-  // Alexandroupolis coast
-  const coast=new THREE.Group();
-  const strip=new THREE.Mesh(new THREE.BoxGeometry(70,1.6,22),mats.land);
-  strip.position.set(-52,.2,12); coast.add(strip);
-  [[-60,2,-1,6,4],[-46,1.6,4,5,3],[-68,1,8,7,5]].forEach(([x,z,s,r,h],i)=>{
-    const hill=new THREE.Mesh(rough(new THREE.ConeGeometry(r,h,8,2),.15,i*3),mats.land);
-    hill.position.set(x,h/2+.8,z+s); coast.add(hill);
-  });
-  // warehouse
-  const wh=new THREE.Mesh(new THREE.BoxGeometry(6,2.6,4),mat('wall',{color:0xdfe5e8}));
-  wh.position.set(-26,2.3,12); coast.add(wh);
-  const roof=new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.4,6,3,1),mat('roof',{color:0x5b6f7c}));
-  roof.rotation.z=Math.PI/2; roof.rotation.x=Math.PI/2; roof.scale.set(1,1,.45); roof.position.set(-26,3.9,12); coast.add(roof);
-  // pallets
-  for(let i=0;i<4;i++){
-    const crate=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.1,1.1),mat('crate'+i,{}));
-    crate.userData.accent=true;
-    crate.position.set(-22.3+(i%2)*1.2,1.55+Math.floor(i/2)*1.12,13.5); coast.add(crate);
-  }
-  // lighthouse
-  const lh=new THREE.Group();
-  const tower=new THREE.Mesh(new THREE.CylinderGeometry(.55,.85,6,10),mat('tower',{color:0xf2f2ee}));
-  tower.position.y=4; lh.add(tower);
-  const lamp=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.8,10),mat('lamp',{emissiveIntensity:.9}));
-  lamp.position.y=7.4; lh.add(lamp);
-  const cap=new THREE.Mesh(new THREE.ConeGeometry(.8,.8,10),mats.roof); cap.position.y=8.2; lh.add(cap);
-  const beam=new THREE.PointLight(0xffcc55,1.2,30); beam.position.y=7.4; lh.add(beam);
-  lh.position.set(-19,0,5.5); coast.add(lh);
-  scene.add(coast);
+// ---------- Alexandroupolis coast (left) + lighthouse ----------
+const land=new THREE.Mesh(new THREE.BoxGeometry(700,2.4,900),new THREE.MeshStandardMaterial({color:0xb9b2a4,roughness:.95}));land.position.set(-430,0.2,-100);scene.add(land);
+const prom=new THREE.Mesh(new THREE.BoxGeometry(14,2.6,900),new THREE.MeshStandardMaterial({color:0xd9d2c3,roughness:.9}));prom.position.set(-87,0.3,-100);scene.add(prom);
+const rockMats=[0x6f6c68,0x807b74,0x5d5a57,0x8b867d].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:1,flatShading:true}));
+for(let i=0;i<260;i++){const r=.7+Math.random()*1.5;const g=new THREE.DodecahedronGeometry(r,1);const pa=g.attributes.position;for(let k=0;k<pa.count;k++){pa.setXYZ(k,pa.getX(k)*(0.8+Math.random()*.4),pa.getY(k)*(.6+Math.random()*.3),pa.getZ(k)*(0.8+Math.random()*.4));}g.computeVertexNormals();
+ const m=new THREE.Mesh(g,rockMats[i%4]);m.position.set(-79+Math.random()*4,-.4+Math.random()*1.2,-300+Math.random()*560);m.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);scene.add(m);}
+const stone=new THREE.MeshStandardMaterial({color:0xe6dfd0,roughness:.8});
+const LH=new THREE.Group();
+const base=new THREE.Mesh(new THREE.CylinderGeometry(3.2,3.5,1.6,8),new THREE.MeshStandardMaterial({color:0xbdb4a2,roughness:.9}));base.position.y=2.3;LH.add(base);
+const tower=new THREE.Mesh(new THREE.CylinderGeometry(1.5,2.1,15,24),stone);tower.position.y=10.6;LH.add(tower);
+for(let k=0;k<3;k++){const w=new THREE.Mesh(new THREE.BoxGeometry(.5,.9,.1),new THREE.MeshStandardMaterial({color:0x2b2f33}));w.position.set(0,6+k*4,1.85-k*.15);LH.add(w);}
+const gal=new THREE.Mesh(new THREE.CylinderGeometry(2.3,2.0,.45,24),new THREE.MeshStandardMaterial({color:0x2f3438,roughness:.5,metalness:.3}));gal.position.y=18.3;LH.add(gal);
+const rail=new THREE.Mesh(new THREE.TorusGeometry(2.2,.06,6,32),gal.material);rail.rotation.x=Math.PI/2;rail.position.y=19.2;LH.add(rail);
+const lanternMat=new THREE.MeshStandardMaterial({color:0xcfe3ea,emissive:0xffd27a,emissiveIntensity:0,transparent:true,opacity:.8,roughness:.05,metalness:.2});
+const lantern=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,2,16),lanternMat);lantern.position.y=19.6;LH.add(lantern);
+const dome=new THREE.Mesh(new THREE.SphereGeometry(1.35,20,10,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x23302b,roughness:.4,metalness:.4}));dome.position.y=20.6;LH.add(dome);
+LH.position.set(-88,0,-200);LH.scale.setScalar(2.6);scene.add(LH);
+// waterfront buildings
+const bcol=[0xf1ece2,0xe4d9c6,0xf6f3ee,0xd9ccb5,0xebe2d2,0xcdd3d6];
+const glass=new THREE.MeshStandardMaterial({color:0x34414c,roughness:.25,metalness:.5});
+for(let i=0;i<34;i++){const w=12+Math.random()*12,h=12+Math.random()*20,d=12+Math.random()*6;const x=-130-Math.random()*240,z=-260+i*13+Math.random()*6;
+ const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:bcol[i%6],roughness:.9}));b.position.set(x,h/2+1.4,z);scene.add(b);
+ for(let f=1;f<h/3.2;f++){const sl=new THREE.Mesh(new THREE.BoxGeometry(w+.6,.25,d+.8),b.material);sl.position.set(x,1.4+f*3.2,z);scene.add(sl);
+  const gw=new THREE.Mesh(new THREE.BoxGeometry(w*.8,1.4,d+.1),glass);gw.position.set(x,1.4+f*3.2-1.3,z);scene.add(gw);}}
+const leaf=new THREE.MeshStandardMaterial({color:0x3d6b3c,roughness:1,flatShading:true});
+for(let i=0;i<40;i++){const t=new THREE.Mesh(new THREE.IcosahedronGeometry(1.8+Math.random()*1.2,1),leaf);t.position.set(-105-Math.random()*20,4.2,-280+i*14);scene.add(t);
+ const tr=new THREE.Mesh(new THREE.CylinderGeometry(.18,.25,3,5),new THREE.MeshStandardMaterial({color:0x5a4632}));tr.position.set(t.position.x,2.4,t.position.z);scene.add(tr);}
 
-  // route
-  const curve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-17,0.3,3),new THREE.Vector3(-4,0.3,-1),
-    new THREE.Vector3(10,0.3,-6),new THREE.Vector3(19,0.3,-9)]);
-  const routeGeo=new THREE.BufferGeometry().setFromPoints(curve.getPoints(120));
-  const routeMat=new THREE.LineDashedMaterial({dashSize:.9,gapSize:.7,transparent:true,opacity:.9});
-  const route=new THREE.Line(routeGeo,routeMat); route.computeLineDistances(); scene.add(route);
+// ---------- container ship ----------
+const ship=new THREE.Group();const shipMats=[];
+function M(o){const m=new THREE.MeshStandardMaterial(o);shipMats.push(m);return m;}
+const hullNavy=M({color:0x15305a,roughness:.55});
+const hullRed=M({color:0x9c2a22,roughness:.7});
+const whiteS=M({color:0xf2f4f6,roughness:.45});
+const glassS=M({color:0x1a2530,roughness:.15,metalness:.6});
+const blueS=M({color:0x1f6fe0,roughness:.4});
+const greyS=M({color:0x8d969e,roughness:.6});
+const hs=new THREE.Shape();hs.moveTo(-30,-2.2);hs.lineTo(24,-2.2);hs.bezierCurveTo(28,-2.2,30.5,1.5,31.5,6);hs.lineTo(-30.5,6);hs.bezierCurveTo(-30.8,3,-30.4,0,-29,-2.2);
+const hG=new THREE.ExtrudeGeometry(hs,{depth:10.4,bevelEnabled:true,bevelSize:.2,bevelThickness:.3,bevelSegments:2,curveSegments:18});hG.translate(0,0,-5.2);
+ship.add(new THREE.Mesh(hG,hullNavy));
+const boot=new THREE.Mesh(new THREE.BoxGeometry(56,1.3,10.95),hullRed);boot.position.set(-1.5,-.35,0);ship.add(boot);
+const sheer=new THREE.Mesh(new THREE.BoxGeometry(61.5,.35,11),whiteS);sheer.position.set(.4,5.95,0);ship.add(sheer);
+// name on hull, both sides
+const nc=document.createElement('canvas');nc.width=2048;nc.height=200;const nx=nc.getContext('2d');
+nx.fillStyle='#ffffff';nx.font='800 150px "Helvetica Neue",Arial,sans-serif';nx.textAlign='center';nx.textBaseline='middle';nx.fillText('ΣΑΛΒΑΝΟΣ ΜΕΤΑΦΟΡΕΣ',1024,108);
+const nT=new THREE.CanvasTexture(nc);nT.anisotropy=8;nT.encoding=THREE.sRGBEncoding;
+const nameMat=M({map:nT,transparent:true,roughness:.5,polygonOffset:true,polygonOffsetFactor:-2});
+const nm=new THREE.Mesh(new THREE.PlaneGeometry(34,3.3),nameMat);nm.position.set(2,3.1,5.52);ship.add(nm);
+const nm2=nm.clone();nm2.rotation.y=Math.PI;nm2.position.z=-5.52;ship.add(nm2);
+// accommodation block (stern)
+function bx(w,h,d,x,y,z,m){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z||0);ship.add(o);return o;}
+bx(8,10,10,-24.5,11,0,whiteS);
+for(let k=0;k<4;k++)bx(8.1,.7,10.1,-24.5,8+k*2.3,0,glassS);
+bx(5,1.8,14,-22.6,16.9,0,whiteS);bx(.15,.9,13,-20.05,17.1,0,glassS);
+bx(3,4,4.2,-28,17.5,0,blueS);bx(3.05,.6,4.25,-28,19.2,0,M({color:0x111418,roughness:.8}));
+bx(.25,4.5,.25,-23.5,20,0,whiteS);bx(2.2,.18,.4,-23.5,22,0,greyS);
+// forecastle + bow mast
+bx(4,1.4,10.2,28.5,6.7,0,whiteS);bx(.25,6,.25,27,9.5,0,greyS);
+// containers (instanced)
+const cc=document.createElement('canvas');cc.width=64;cc.height=64;const cx=cc.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,64,64);
+for(let i=0;i<64;i+=4){cx.fillStyle='rgba(0,0,0,.18)';cx.fillRect(i,0,1.5,64);}cx.strokeStyle='rgba(0,0,0,.35)';cx.lineWidth=3;cx.strokeRect(1,1,62,62);
+const cT=new THREE.CanvasTexture(cc);cT.encoding=THREE.sRGBEncoding;
+const contMat=M({map:cT,roughness:.75});
+const pal=[0x1f6fe0,0x1f6fe0,0xc0392b,0xe67e22,0x2e7d32,0x7f8c8d,0xeceff1,0x4fa3d1,0x8e2b2b,0x264d8c,0xd4a017];
+const bays=[],cg=new THREE.BoxGeometry(5.8,2.5,2.4);
+for(let bI=0;bI<8;bI++){const x=-17+bI*6.1;for(let r=0;r<4;r++){const tiers=2+Math.floor(Math.random()*3)+(bI>0&&bI<7?1:0);for(let t=0;t<tiers;t++)bays.push([x,7.3+t*2.55,-3.75+r*2.5]);}}
+const inst=new THREE.InstancedMesh(cg,contMat,bays.length);const dm=new THREE.Object3D(),col=new THREE.Color();
+bays.forEach((p,i)=>{dm.position.set(...p);dm.updateMatrix();inst.setMatrixAt(i,dm.matrix);inst.setColorAt(i,col.set(pal[Math.floor(Math.random()*pal.length)]));});
+ship.add(inst);
+const deckWin=glassS,navL=new THREE.PointLight(0xffe2b0,0,40,2);ship.add(navL);
+ship.scale.setScalar(1.9);scene.add(ship);
+// wake
+const wc=document.createElement('canvas');wc.width=256;wc.height=1024;const x=wc.getContext('2d');
+for(let i=0;i<6000;i++){const yy=Math.random()*1024,t=yy/1024,spread=16+t*100,side=(Math.random()<.5?-1:1),edge=Math.random()<.5;const xx=128+(edge?side*spread*(.8+Math.random()*.2):(Math.random()-.5)*(14+t*40));const r=2+Math.random()*5*(1-t*.5);x.fillStyle='rgba(255,255,255,'+(.4*Math.pow(1-t,1.2)*(.4+Math.random()*.6))+')';x.beginPath();x.arc(xx,yy,r,0,6.283);x.fill();}
+const wakeT=new THREE.CanvasTexture(wc);
+const wake=new THREE.Mesh(new THREE.PlaneGeometry(48,210),new THREE.MeshBasicMaterial({map:wakeT,transparent:true,depthWrite:false,opacity:.9}));wake.rotation.x=-Math.PI/2;scene.add(wake);
 
-  // ferry with cargo
-  const ferry=new THREE.Group();
-  const hull=new THREE.Mesh(new THREE.BoxGeometry(4.6,1,1.8),mat('hull'));
-  hull.position.y=.5; ferry.add(hull);
-  const bow=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,1,3),mats.hull);
-  bow.rotation.y=Math.PI/2; bow.scale.set(1,1,1); bow.position.set(2.55,.5,0); ferry.add(bow);
-  const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.1,1,1.4),mats.hull); cabin.position.set(-1.5,1.5,0); ferry.add(cabin);
-  for(let i=0;i<3;i++){
-    const c=new THREE.Mesh(new THREE.BoxGeometry(.9,.75,1.3),mat('cargo'+i,{}));
-    c.userData.accent=i!==1; c.userData.alt=i===1;
-    c.position.set(-.3+i*1,1.38,0); ferry.add(c);
-  }
-  scene.add(ferry);
+const winMat=glassS,beamMat={opacity:0},lhLight={intensity:0},beamM={rotation:{}};
 
-  function applyTheme(){
-    mats.sea.color.set(css('--sea'));
-    mats.land.color.set(css('--land'));
-    mats.hull.color.set(css('--hull'));
-    const acc=new THREE.Color(css('--accent'));
-    mats.lamp.color.copy(acc); mats.lamp.emissive=acc.clone();
-    Object.keys(mats).forEach(k=>{
-      if(k.startsWith('crate')||k.startsWith('cargo')){
-        mats[k].color.set(k==='cargo1'?css('--sea'):css('--accent'));
-      }
-    });
-    routeMat.color.set(css('--ink'));
-    scene.fog.color.set(css('--bg'));
-    render();
-  }
-
-  const isMobile=()=>window.innerWidth/window.innerHeight<.8;
-  let w=0,h=0;
-  function resize(){
-    const r=canvas.getBoundingClientRect(); w=r.width; h=r.height;
-    renderer.setSize(w,h,false); camera.aspect=w/h;
-    camera.fov=isMobile()?52:34; camera.updateProjectionMatrix();
-    render();
-  }
-
-  let px=0,py=0,scrollF=0;
-  window.addEventListener('pointermove',e=>{px=e.clientX/window.innerWidth-.5;py=e.clientY/window.innerHeight-.5;},{passive:true});
-  window.addEventListener('scroll',()=>{scrollF=Math.min(1,window.scrollY/Math.max(1,h));},{passive:true});
-
-  let t=0;
-  function update(dt){
-    t+=dt;
-    for(let i=0;i<seaPos.count;i++){
-      const x=seaPos.getX(i),z=seaPos.getZ(i);
-      seaPos.setY(i,Math.sin(x*.14+t*.9)*.35+Math.cos(z*.22+t*.7)*.28);
-    }
-    seaPos.needsUpdate=true; seaGeo.computeVertexNormals();
-    // ferry: out and back
-    const cyc=(t*.045)%2, u=cyc<1?cyc:2-cyc, dir=cyc<1?1:-1;
-    const s=.5-.5*Math.cos(u*Math.PI);
-    const p=curve.getPointAt(s), tan=curve.getTangentAt(s).multiplyScalar(dir);
-    ferry.position.set(p.x,Math.sin(t*1.6)*.18,p.z);
-    ferry.rotation.y=Math.atan2(-tan.z,tan.x);
-    ferry.rotation.z=Math.sin(t*1.3)*.04;
-    beam.intensity=1+.5*Math.sin(t*3);
-    routeMat.dashOffset=-t*.8;
-  }
-  function render(){
-    if(isMobile()){
-      // look along the route: Alexandroupolis in front, Samothraki across the sea
-      camera.position.set(-44+px*4,20-scrollF*5,26);
-      camera.lookAt(8,1-scrollF*3,-6);
-    }else{
-      camera.position.set(px*6+4,20-scrollF*8+py*2,56-scrollF*10);
-      camera.lookAt(6,11-scrollF*6,-4);
-    }
-    renderer.render(scene,camera);
-  }
-
-  let last=performance.now(),running=true;
-  function loop(now){
-    if(!running) return;
-    update(Math.min(.05,(now-last)/1000)); last=now; render();
-    requestAnimationFrame(loop);
-  }
-  new ResizeObserver(resize).observe(canvas);
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
-  new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-
-  resize(); update(4); applyTheme();
-  if(!reduce){
-    new IntersectionObserver(([e])=>{
-      if(e.isIntersecting&&!running){running=true;last=performance.now();requestAnimationFrame(loop);}
-      else if(!e.isIntersecting) running=false;
-    }).observe(canvas);
-    requestAnimationFrame(loop);
-  }
+// route: from harbor (right of lighthouse) toward Samothraki
+const A=new THREE.Vector3(-45,0,-120),B=new THREE.Vector3(340,0,-190);
+let mode='day';
+function apply(m){mode=m;const p=P[m];
+ skyU.top.value.set(p.top);skyU.hor.value.set(p.hor);skyU.sunCol.value.set(p.sunCol);skyU.stars.value=p.stars;skyU.night.value=m==='night'?1:0;
+ const sd=new THREE.Vector3(...p.sunDir).normalize();skyU.sunDir.value.copy(sd);wU.sunDir.value.copy(sd);
+ sun.position.copy(sd).multiplyScalar(500);sun.color.set(p.sunCol);sun.intensity=p.sunI;
+ hemi.color.set(p.hemiS);hemi.groundColor.set(p.hemiG);hemi.intensity=p.hemiI;
+ scene.fog.color.set(p.haze);scene.fog.density=p.fogD*.55;
+ wU.deep.value.set(p.deep);wU.shallow.value.set(p.shallow);wU.skyHor.value.set(p.hor);wU.skyTop.value.set(p.top);wU.sunCol.value.set(p.sunCol);wU.fogCol.value.set(p.haze);wU.fogD.value=p.fogD;
+ R.toneMappingExposure=m==='night'?1.05:m==='golden'?1.0:.95;
+}
+function resize(){const w=canvas.clientWidth||innerWidth,h=canvas.clientHeight||innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=w/h<1.15?62:46;cam.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(canvas);resize();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;const t0=performance.now();let running=true;
+function frame(now){const t=reduce?24:(now-t0)/1000;wU.time.value=t;
+ const u=((t*.016)%1);const pos=A.clone().lerp(B,u);const fa=Math.min(1,u/.05,(1-u)/.05);shipMats.forEach(m=>{m.transparent=fa<1||m===nameMat;m.opacity=fa;});wake.material.opacity=.95*fa;const dir=B.clone().sub(A).normalize();
+ ship.position.set(pos.x,0,pos.z);ship.rotation.y=Math.atan2(-dir.z,dir.x);ship.position.y=.8+Math.sin(t*.9)*.15;ship.rotation.x=Math.sin(t*.8)*.012;ship.rotation.z=Math.sin(t*.9)*.015;
+ wake.position.set(pos.x-dir.x*140,.9,pos.z-dir.z*140);wake.rotation.z=-Math.atan2(dir.x,-dir.z);
+ R.render(scene,cam);if(running&&!reduce)requestAnimationFrame(frame);}
+apply('day');
+requestAnimationFrame(frame);
+new IntersectionObserver(([e])=>{if(e.isIntersecting&&!running){running=true;requestAnimationFrame(frame);}else if(!e.isIntersecting)running=false;}).observe(canvas);
 })();
 </script>
 <script data-goatcounter="https://salvanos.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
