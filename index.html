@@ -171,6 +171,27 @@ body{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom,0px))}
 .callbar div{grid-template-columns:repeat(4,minmax(0,1fr))}
 .hero::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,13,.78) 0%,rgba(5,7,13,.45) 38%,rgba(5,7,13,0) 62%),linear-gradient(0deg,rgba(5,7,13,.85) 0%,rgba(5,7,13,0) 22%)}
 @media (max-aspect-ratio:4/5){.hero::before{display:none}}
+/* --- 3D «Τι μεταφέρουμε» (λευκό κοντέινερ) --- */
+.tm{--tm-blue:var(--accent);--tm-ice:#cfe9ff;--tm-panel:rgba(9,18,38,.8);--tm-line:rgba(47,140,255,.3)}
+.tm-wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1180px;margin:0 auto}
+.tm-top{padding-block:56px 18px}
+.tm-eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--tm-blue)}
+.tm-h2{font-weight:900;font-size:clamp(26px,4vw,40px);line-height:1.1;margin:6px 0 0;text-wrap:balance}
+.tm-lead{color:var(--muted);max-width:58ch;margin:10px 0 0}
+.tm-scrolly{position:relative}
+.tm-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.tm-stage canvas{display:block;width:100%;height:100%}
+.tm-hud{position:absolute;top:16px;right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:6px;pointer-events:none}
+.tm-hud i{width:22px;height:4px;border-radius:2px;background:rgba(5,7,13,.25)}
+.tm-hud i.on{background:var(--tm-blue)}
+.tm-steps{position:relative;margin-top:-100vh;margin-top:-100svh;pointer-events:none}
+.tm-step{min-height:100vh;min-height:100svh;display:flex;align-items:center}
+.tm-card{pointer-events:auto;max-width:380px;background:var(--tm-panel);border:1px solid var(--tm-line);border-radius:14px;padding:20px 22px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--ink)}
+.tm-no{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7cc0ff}
+.tm-card h2{font-weight:700;font-size:22px;line-height:1.2;margin:6px 0 8px}
+.tm-card p{margin:0;color:var(--tm-ice)}
+.tm-cta{display:inline-block;margin-top:14px;background:var(--accent);color:var(--on-accent);font-weight:700;text-decoration:none;padding:11px 18px;border-radius:10px}
+@media (max-width:720px){.tm-step{align-items:flex-end;padding-bottom:22px}.tm-card{max-width:none;width:100%;padding:16px 18px}.tm-card h2{font-size:19px}}
 </style>
 </head>
 <body>
@@ -207,7 +228,34 @@ body{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom,0px))}
     </div>
   </section>
 
-  <section class="block" id="ypiresies">
+  <div class="tm"><div class="tm-wrap" id="v2head">
+<header class="tm-top" style="padding-top:56px">
+  <div>
+    <div class="tm-eyebrow">Τι μεταφέρουμε</div>
+    <h2 class="tm-h2">Ό,τι χωράει σε φορτηγό</h2>
+    <p class="tm-lead">Κατέβα με το scroll και δες τι βγαίνει από το κοντέινερ.</p>
+  </div>
+</header>
+</div>
+<section class="tm-scrolly" id="scrolly2">
+  <div class="tm-stage" id="stage2">
+    <canvas id="c2" aria-label="3D σκηνή: λευκό κοντέινερ στο λιμάνι με θέα Σαμοθράκη"></canvas>
+    <div class="tm-hud" id="hud2" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="tm-steps tm-wrap">
+    <div class="tm-step"><div class="tm-card">
+      <div class="tm-no">Αλεξανδρούπολη · Θεσσαλονίκη · Σαμοθράκη</div>
+      <h2>Ό,τι χωράει σε φορτηγό, το πάμε.</h2>
+      <p>Από το λιμάνι της Αλεξανδρούπολης μέχρι την Καμαριώτισσα.</p>
+    </div></div>
+    <div class="tm-step"><div class="tm-card"><div class="tm-no">01 · Παλέτες &amp; δέματα</div><h2>Ένα κιβώτιο ή ολόκληρο φορτίο</h2><p>Εμπορεύματα για καταστήματα, σούπερ μάρκετ και επαγγελματίες.</p></div></div>
+    <div class="tm-step"><div class="tm-card"><div class="tm-no">02 · Συσκευές</div><h2>Ψυγεία και ηλεκτρικές συσκευές</h2><p>Φορτηγό με υδραυλική πόρτα: κατεβαίνουν όρθια, χωρίς χτυπήματα.</p></div></div>
+    <div class="tm-step"><div class="tm-card"><div class="tm-no">03 · Έπιπλα</div><h2>Έπιπλα μέχρι μέσα στο σπίτι</h2><p>Παράδοση στην πόρτα ή στον όροφο, για ιδιώτες και καταστήματα.</p></div></div>
+    <div class="tm-step"><div class="tm-card"><div class="tm-no">04 · Οικοδομικά</div><h2>Τσιμέντα, πλακάκια, υλικά</h2><p>Βαριές παλέτες για εργοτάξια και οικοδομές, και στη Σαμοθράκη.</p></div></div>
+    <div class="tm-step"><div class="tm-card"><div class="tm-no">05 · Αποθήκευση</div><h2>Το φορτίο σου μένει σε εμάς</h2><p>322 m² στεγασμένη αποθήκη στο 6ο χλμ Αλεξανδρούπολης–Συνόρων, απέναντι από το αεροδρόμιο.</p><a class="tm-cta" href="#epikoinonia">Ζήτα προσφορά</a></div></div>
+  </div>
+</section></div>
+<section class="block" id="ypiresies">
     <div class="wrap">
       <h2>Τι αναλαμβάνουμε</h2>
       <p class="lead">Κάθε είδους μεταφορά, με σημεία σε Σαμοθράκη, Αλεξανδρούπολη και Θεσσαλονίκη, και προς κάθε προορισμό στην Ελλάδα.</p>
@@ -598,6 +646,7 @@ requestAnimationFrame(frame);
 new IntersectionObserver(([e])=>{if(e.isIntersecting&&!running){running=true;requestAnimationFrame(frame);}else if(!e.isIntersecting)running=false;}).observe(canvas);
 })();
 </script>
+<script src="kontainer.js?v=1"></script>
 <script data-goatcounter="https://salvanos.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
